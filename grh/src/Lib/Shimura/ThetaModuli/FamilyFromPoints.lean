@@ -276,8 +276,12 @@ lemma exists_isAbelianScheme (j : ι → κ) (hη : IsDenseFamily fun i : ι ↦
       (lift (e z.1.1.1 z.2) (lift (e z.1.1.1 z.1.2) (e z.1.1.1 z.1.1.2))).left :=
     h_pairs.prod (y := fun s : (κ × V) × V ↦ lift (e s.1.1 s.2) (e s.1.1 s.1.2))
       (e := fun s : (κ × V) × V ↦ e s.1.1) hη h_red fun s : (κ × V) × V ↦ (he_sep s.1.1).right
-  have h_left : (λ_ A).inv = lift (toUnit A) (𝟙 A) := by aesop
-  have h_right : (ρ_ A).inv = lift (𝟙 A) (toUnit A) := by aesop
+  have h_left : (λ_ A).inv = lift (toUnit A) (𝟙 A) := by
+    apply CartesianMonoidalCategory.hom_ext <;>
+      simp only [leftUnitor_inv_fst, leftUnitor_inv_snd, lift_fst, lift_snd]
+  have h_right : (ρ_ A).inv = lift (𝟙 A) (toUnit A) := by
+    apply CartesianMonoidalCategory.hom_ext <;>
+      simp only [rightUnitor_inv_fst, rightUnitor_inv_snd, lift_fst, lift_snd]
   let _ : AddGrpObj A :=
     { zero := o
       add := m

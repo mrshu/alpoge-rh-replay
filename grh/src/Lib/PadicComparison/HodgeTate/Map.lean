@@ -210,9 +210,13 @@ def pairAlg : HodgeTatePair ⥤ CommAlg k where
     (AlgHom.prod
       { toFun (x : X.PairRing) :=
           thickeningOver.map f.1 x.1.1 + thickeningOver.mulMu Y.test (f.2 x.1.2.snd).fst
-        map_one' := by simp
+        map_one' := by
+          change thickeningOver.map f.1 1 + mulMu Y.test (f.2 0).fst = 1
+          simp only [map_one, map_zero, Prod.fst_zero, add_zero]
         map_mul' := map_base_add_mulMu_mul f
-        map_zero' := by simp
+        map_zero' := by
+          change thickeningOver.map f.1 0 + mulMu Y.test (f.2 0).fst = 0
+          simp only [map_zero, Prod.fst_zero, add_zero]
         map_add' := map_fst_add_mulMu_add f
         commutes' r := by simp [algebraMap_eq_inl'] }
       (((toHodgeTest ⋙ HodgeTest.sqZeroExt).map f).1.comp (AlgHom.pullbackSnd ..)))
@@ -225,8 +229,8 @@ def pairAlg : HodgeTatePair ⥤ CommAlg k where
       change _ = thickeningOver.map _ (_ + _) + _
       simp [← map_mulMu, add_assoc]
       rfl
-    · simp
-      rfl
+    · rename_i x
+      exact ConcreteCategory.congr_hom ((toHodgeTest ⋙ HodgeTest.sqZeroExt).map_comp f g) x.val.snd
 
 /-- The natural projection of k-algebras B_S ×_T (T ⊕ M) → T ⊕ M. -/
 def toSqZero : pairAlg ⟶ toHodgeTest ⋙ HodgeTest.sqZeroExt where
@@ -348,15 +352,17 @@ lemma scaleModule_comp_contractionPow (t : k) (h : ℕ) :
       have h_snd_scale (y : ExteriorAlgebra c.GenericRing (Fin c.rank → c.GenericRing)) :
           exteriorMapSnd f.snd (exteriorMap (t • LinearMap.id) y) =
             exteriorMap (t • LinearMap.id) (exteriorMapSnd f.snd y) := by
-        induction y using left_induction <;>
-          simp [*, Algebra.algebraMap_eq_smul_one, -LinearMap.map_smul_of_tower]
+        induction y using left_induction with
+        | algebraMap r => simp [Algebra.algebraMap_eq_smul_one]
+        | add y y' hy hy' => simp only [map_add, hy, hy']
+        | ι_mul y v hy => simp [hy, h_smul, -LinearMap.map_smul_of_tower]
       -- contraction lowers the form degree by one, which costs one factor `t`
       have h_contraction_scale (y : ExteriorAlgebra c.GenericRing (Fin c.rank → c.GenericRing)) :
           contraction f.snd (exteriorMap (t • LinearMap.id) y) =
             t • exteriorMap (t • LinearMap.id) (contraction f.snd y) := by
         induction y using left_induction with
         | algebraMap r => simp [Algebra.algebraMap_eq_smul_one]
-        | add y y' hy hy' => simp [hy, hy']
+        | add y y' hy hy' => simp only [map_add, hy, hy', smul_add]
         | ι_mul y v hy =>
           simp [hy, h_snd_scale, h_smul, -LinearMap.map_smul_of_tower]
           module
@@ -612,12 +618,12 @@ lemma HodgeTatePair.contractionPow_cup {a : ℕ} {M L : AbFunctor HodgeTatePair}
     rw [sum_choose_succ_nsmul fun _ _ ↦ _, contractionPow,
       ← TotalH.comp_assoc_of_sq tensorContractionCocycle_comp_wedgePairing]
     -- Expand the sum, insert the two components, and apply `ih` to both terms.
-    simp [TotalH.homClass, Ext.mk₀_add, homClass_comp, ← comp_assoc,
+    simp [-map_smul, TotalH.homClass, Ext.mk₀_add, homClass_comp, ← comp_assoc,
       cup_comp_tensorContractionCocycle_π_true, cup_comp_tensorContractionCocycle_π_false,
       ← cup_comp_homClass_left, contractionPow]
     simp [comp_of, ih, smul_sum, comp_assoc]
     -- Compare term by term; what is left is an identity of signs.
-    congr! 2 with h h_mem
+    refine congrArg₂ (· + ·) ?_ ?_ <;> refine Finset.sum_congr rfl fun h h_mem ↦ ?_
     · -- terms where the contraction acts on `y`: moving it past `x` gives `(-1) ^ a`, and the
       -- grade involution on `contractionPow h` gives `(-1) ^ h`
       have h_sign : (-1 : k) ^ ((a + h) * (l - h + 1)) =

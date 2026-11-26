@@ -104,7 +104,9 @@ induced by f. The identity is (𝟙, m ↦ (0, m)), and (f, φ) followed by (g, 
       (Fin Y.rank → Y.GenericRing),
     id _ := ⟨𝟙 _, ⟨(0, ·), by simp⟩, by simp⟩
     comp f g := ⟨f.1 ≫ g.1, ⟨fun m ↦ (genericOver.map g.1 (f.2 m).1, 0) + g.2 (f.2 m).2, by
-      simp [add_add_add_comm]⟩, by simp⟩} ..
+      intro x y
+      apply Prod.ext <;> simp only [map_add, Prod.fst_add, Prod.snd_add, zero_add]
+      exact add_add_add_comm ..⟩, by simp⟩} ..
   all_goals
     intros
     exact congr(⟨_, $(by ext <;> simp [add_assoc])⟩)
@@ -179,8 +181,8 @@ lemma map_base_add_mulMu_mul {X Y : HodgeTatePair} (f : X ⟶ Y) (x y : X.PairRi
   have h_mulMu_mul_mulMu (u v : genericOver.obj Y.test) : mulMu Y.test u * mulMu Y.test v = 0 := by
     rw [← mulMu_proj_mul, proj_mulMu, zero_mul, map_zero]
   rw [h_cross, PairRing.base, MulMemClass.coe_mul, Prod.fst_mul, map_mul, add_mul, mul_add, mul_add,
-    h_mulMu_mul_mulMu]
-  ring
+    h_mulMu_mul_mulMu, add_zero, add_assoc,
+    mul_comm (mulMu Y.test (moduleMap f (PairRing.sqZero x).snd).fst)]
 
 seal PadicTest.genericAlg in
 /-- Let `f : X ⟶ Y` be a morphism of pairs with `moduleMap f = (φ₀, φ₁)`. The map from

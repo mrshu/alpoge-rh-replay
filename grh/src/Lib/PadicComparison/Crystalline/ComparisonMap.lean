@@ -466,7 +466,7 @@ lemma hasCrysComparison_of_etale (G : Type) [AddCommMonoid.{0} G] [Module ℚ≥
     exists_isCompletionBijective_witt_tensor G T h_perf
   -- `B ≅ OC ⊗ T`, so `Hom(B, -)` on `OC`-algebras is `Hom(T, -)` over `Ainf`.
   let iso : reprBy B ≅ restrictAlg Ainf OC ⋙ reprBy (.of Ainf T) :=
-    reprFunctor.mapIso (isoMk ((bc _).symm.trans (liftIso.restrictScalars _))).op ≪≫
+    reprFunctor.mapIso (CommAlgCat.isoMk ((bc OC).symm.trans (liftIso.restrictScalars OC))).op ≪≫
       isoOfAppBijective _ (pointMap_algBaseChange_unit_bijective (.of Ainf T))
   have h_witt : HasCrysComparison (restrictAlg Ainf OC ⋙ reprBy (.of Ainf T)) :=
     hasCrysComparison_of_witt ⟨b, h_perf, h_reg⟩ k hk

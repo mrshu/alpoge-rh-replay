@@ -166,12 +166,13 @@ lemma New.Selmer.isNegligible_padicValNat_oddClassBound {P : Parameters} (D : Da
       ≤ log (2 ^ (4 * (D.cyclotomicConductor + D.t + 3) ^ 27) * NumberField.classNumber D.E : ℕ) :=
         sum_padicValNat_mul_log_le T hT (oddClassBound_le D)
     _ = 4 * (D.cyclotomicConductor + D.t + 3) ^ 27 * log 2 + log (NumberField.classNumber D.E) := by
-        push_cast
-        rw [log_mul (by positivity) (mod_cast NumberField.classNumber_ne_zero D.E), log_pow]
-        push_cast
-        ring
-    _ ≤ 4 * (D.cyclotomicConductor + D.t + 3) ^ 27 * log 2 + D.x ^ 30 := by
-      grw [D.log_classNumber_le]
+        generalize D.cyclotomicConductor = c
+        rw [Nat.cast_mul, Nat.cast_pow, Nat.cast_ofNat,
+          log_mul (by positivity) (Nat.cast_ne_zero.mpr (NumberField.classNumber_ne_zero D.E)),
+          log_pow]
+        simp only [Nat.cast_mul, Nat.cast_pow, Nat.cast_add, Nat.cast_ofNat]
+    _ ≤ 4 * (D.cyclotomicConductor + D.t + 3) ^ 27 * log 2 + D.x ^ 30 :=
+      add_le_add_right D.log_classNumber_le _
     _ ≤ D.x ^ 2000 := D.le_of_hasLogBound
 
 /-- The numbers `twistError l D = (4 f + 3) r v_l(D.chosenGroupOrder) + 2⁻ˡ` are negligible with
